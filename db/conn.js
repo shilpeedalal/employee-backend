@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const {DATABASE, MONGODB_OPTIONS} = require('./config');
+// const {DATABASE, MONGODB_OPTIONS} = require('./config');
 mongoose.set("strictQuery", false);
 
 const DB = process.env.DATABASE;
