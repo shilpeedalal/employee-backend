@@ -2,7 +2,7 @@ const express = require("express");
 const router = new express.Router();
 const controllers = require("../Controllers/usersControllers");
 const upload = require("../multerconfig/storageConfig")
-const connect = require("../db/conn.js");
+const dbConnect = require("../db/conn.js");
 
 // routes
 router.post("/user/register",upload.single("user_profile"),controllers.userpost);
