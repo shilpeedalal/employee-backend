@@ -2,22 +2,20 @@ const users = require("../models/usersSchema");
 const moment = require("moment");
 const csv = require("fast-csv");
 const fs = require("fs");
-const connect = require("../db/conn.js");
-
+const {dbConnect} = require("../db/conn");
 const BASE_URL = process.env.BASE_URL
 
 // register user
 exports.userpost = async (req, res) => {
-    console.log("register api");
-    await connect()
     const file = req.file.filename;
     const { fname, lname, email, mobile, gender, location, status } = req.body;
-
+    
     if (!fname || !lname || !email || !mobile || !gender || !location || !status || !file) {
         res.status(401).json("All Inputs is required")
     }
-
+    
     try {
+        dbConnect();
         const preuser = await users.findOne({ email: email });
 
         if (preuser) {
@@ -41,29 +39,30 @@ exports.userpost = async (req, res) => {
 
 // usersget
 exports.userget = async (req, res) => {
-
+    
     const search = req.query.search || ""
     const gender = req.query.gender || ""
     const status = req.query.status || ""
     const sort = req.query.sort || ""
     const page = req.query.page || 1
     const ITEM_PER_PAGE = 4;
-
-
+    
+    
     const query = {
         fname: { $regex: search, $options: "i" }
     }
-
+    
     if (gender !== "All") {
         query.gender = gender
     }
-
+    
     if (status !== "All") {
         query.status = status
     }
-
+    
     try {
-
+        
+        dbConnect();
         const skip = (page - 1) * ITEM_PER_PAGE  // 1 * 4 = 4
 
         const count = await users.countDocuments(query);
@@ -88,10 +87,10 @@ exports.userget = async (req, res) => {
 
 // single user get
 exports.singleuserget = async (req, res) => {
-
     const { id } = req.params;
-
+    
     try {
+        dbConnect();
         const userdata = await users.findOne({ _id: id });
         res.status(200).json(userdata)
     } catch (error) {
@@ -104,10 +103,11 @@ exports.useredit = async (req, res) => {
     const { id } = req.params;
     const { fname, lname, email, mobile, gender, location, status, user_profile } = req.body;
     const file = req.file ? req.file.filename : user_profile
-
+    
     const dateUpdated = moment(new Date()).format("YYYY-MM-DD hh:mm:ss");
-
+    
     try {
+        dbConnect();
         const updateuser = await users.findByIdAndUpdate({ _id: id }, {
             fname, lname, email, mobile, gender, location, status, profile: file, dateUpdated
         }, {
@@ -125,6 +125,7 @@ exports.useredit = async (req, res) => {
 exports.userdelete = async (req, res) => {
     const { id } = req.params;
     try {
+        dbConnect();
         const deletuser = await users.findByIdAndDelete({ _id: id });
         res.status(200).json(deletuser);
     } catch (error) {
@@ -136,8 +137,9 @@ exports.userdelete = async (req, res) => {
 exports.userstatus = async (req, res) => {
     const { id } = req.params;
     const { data } = req.body;
-
+    
     try {
+        dbConnect();
         const userstatusupdate = await users.findByIdAndUpdate({ _id: id }, { status: data }, { new: true });
         res.status(200).json(userstatusupdate)
     } catch (error) {
@@ -148,6 +150,7 @@ exports.userstatus = async (req, res) => {
 // export user
 exports.userExport = async (req, res) => {
     try {
+        dbConnect();
         const usersdata = await users.find();
 
         const csvStream = csv.format({ headers: true });
@@ -193,5 +196,18 @@ exports.userExport = async (req, res) => {
 
     } catch (error) {
         res.status(401).json(error)
+    }
+}
+
+exports.test = async(req, res) => {
+    try {
+        console.log("db connection start");
+        await dbConnect();
+        console.log("db conn ends");
+
+        res.status(200).json("Successully test execute");
+    } catch (error) {
+        console.log("error =>>>>>>", error);
+        res.status(401).json("Error in test api");
     }
 }
