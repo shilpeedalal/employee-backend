@@ -3,7 +3,7 @@ const express = require("express");
 const app = express();
 require("./db/conn");
 const cors = require("cors");
-const router = require("./routes/router");
+const router = require("./Routes/router.js");
 const PORT = process.env.PORT || 3000
 console.log("inside app.js")
 
