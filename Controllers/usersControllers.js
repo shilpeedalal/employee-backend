@@ -2,10 +2,14 @@ const users = require("../models/usersSchema");
 const moment = require("moment");
 const csv = require("fast-csv");
 const fs = require("fs");
+const connect = require("../db/conn.js");
+
 const BASE_URL = process.env.BASE_URL
 
 // register user
 exports.userpost = async (req, res) => {
+    console.log("register api");
+    await connect()
     const file = req.file.filename;
     const { fname, lname, email, mobile, gender, location, status } = req.body;
 

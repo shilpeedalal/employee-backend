@@ -10,16 +10,18 @@ const DB = process.env.DATABASE;
 //     console.log(err);
 // })
 
-	try {
-		if (
-			mongoose.connections[0].readyState === 0 ||
-			mongoose.connections[0].readyState === 3
-		) {
-			mongoConnect = await mongoose.connect(
-				process.env.DATABASE,
-				{ useNewUrlParser: true,  useUnifiedTopology: true }
-			);
-			console.log(`mongo conn making: ${mongoose.connections[0].readyState}`);
+	const connect = async()=>{
+
+		try {
+			if (
+				mongoose.connections[0].readyState === 0 ||
+				mongoose.connections[0].readyState === 3
+				) {
+					mongoConnect = await mongoose.connect(
+						process.env.DATABASE,
+						{ useNewUrlParser: true,  useUnifiedTopology: true }
+						);
+						console.log(`mongo conn making: ${mongoose.connections[0].readyState}`);
 			return 1;
 		} else {
 			console.log(`mongo conn exists: ${mongoose.connections[0].readyState}`);
@@ -28,5 +30,10 @@ const DB = process.env.DATABASE;
 	} catch (e) {
 		console.log("mongoose monc error");
 		console.log(e);
-		throw Error("conn error");
+		// throw Error("conn error");
 	}
+}
+
+// connect();
+
+module.exports = connect;
