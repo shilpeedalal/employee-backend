@@ -19,7 +19,7 @@ exports.dbConnect = async () => {
 	  ) {
 		//@ts-ignore
 		mongoConnect = await mongoose.connect(
-			"mongodb+srv://shilpeedalal937:shilpee%40123@cluster0.ull916t.mongodb.net/user-module?retryWrites=true&w=majority",
+			process.env.DATABASE,
 			{
 				useNewUrlParser: true,
 				useUnifiedTopology: true,

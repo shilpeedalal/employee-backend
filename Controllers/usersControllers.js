@@ -7,19 +7,22 @@ const BASE_URL = process.env.BASE_URL
 
 // register user
 exports.userpost = async (req, res) => {
-    const file = req.file.filename;
+    console.log("register user");
     const { fname, lname, email, mobile, gender, location, status } = req.body;
+    const file = req.file ? req.file.filename : null;
     
+    console.log("file",file);
+    console.log("req.file.filename",req.file.filename);
     if (!fname || !lname || !email || !mobile || !gender || !location || !status || !file) {
-        res.status(401).json("All Inputs is required")
+        return res.status(401).json("All Inputs is required")
     }
-    
+    console.log("---error");
     try {
         dbConnect();
         const preuser = await users.findOne({ email: email });
-
+        console.log("after db");
         if (preuser) {
-            res.status(401).json("This user already exist in our databse")
+            return res.status(401).json({error :"This user already exist in our databse"})
         } else {
 
             const datecreated = moment(new Date()).format("YYYY-MM-DD hh:mm:ss");
@@ -28,11 +31,11 @@ exports.userpost = async (req, res) => {
                 fname, lname, email, mobile, gender, location, status, profile: file, datecreated
             });
             await userData.save();
-            res.status(200).json(userData);
+            return res.status(200).json(userData);
         }
     } catch (error) {
-        res.status(401).json(error);
-        console.log("catch block error")
+        console.log("catch block error", error)
+        return res.status(401).json({error : "An error occurred while processing the request"});
     }
 };
 
@@ -52,11 +55,11 @@ exports.userget = async (req, res) => {
         fname: { $regex: search, $options: "i" }
     }
     
-    if (gender !== "All") {
+    if (gender && gender != "All") {
         query.gender = gender
     }
     
-    if (status !== "All") {
+    if (status && status != "All") {
         query.status = status
     }
     
@@ -68,9 +71,10 @@ exports.userget = async (req, res) => {
         const count = await users.countDocuments(query);
 
         const usersdata = await users.find(query)
-            .sort({ datecreated: sort == "new" ? -1 : 1 })
-            .limit(ITEM_PER_PAGE)
-            .skip(skip);
+        .sort({ datecreated: sort == "new" ? -1 : 1 })
+        .limit(ITEM_PER_PAGE)
+        .skip(skip);
+        console.log("query", query);
 
         const pageCount = Math.ceil(count/ITEM_PER_PAGE);  // 8 /4 = 2
 
@@ -80,6 +84,8 @@ exports.userget = async (req, res) => {
             },
             usersdata
         })
+        console.log("count",count)
+        console.log(usersdata);
     } catch (error) {
         res.status(401).json(error)
     }
@@ -123,6 +129,7 @@ exports.useredit = async (req, res) => {
 
 // delete user
 exports.userdelete = async (req, res) => {
+    console.log("delete api");
     const { id } = req.params;
     try {
         dbConnect();
